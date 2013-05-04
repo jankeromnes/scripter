@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# Script name
+if [ -z "$NAME" ]; then
+  NAME="$1"
+fi
+if [ -z "$NAME" ]; then
+  echo -n "Script name? []:"
+  read NAME
+fi
+
+# Script description
+if [ -z "$DESCRIPTION" ]; then
+  echo -n "Description? []:"
+  read DESCRIPTION
+fi
+
+# Guess github username
+GITHUB=$(git config user.name | sed 's_\s__g' | tr '[A-Z]' '[a-z]')
+echo -n "Github username? [$GITHUB]:"
+read CUSTOM_GITHUB
+if [ -n "$CUSTOM_GITHUB" ]; then
+  GITHUB="$CUSTOM_GITHUB"
+fi
+
+# Create Repository
+mkdir "$NAME"
+cd "$NAME"
+git init .
+git remote add origin "git@github.com:$GITHUB/$NAME"
+
+# Create empty script
+echo "#!/bin/bash
+
+" >> $NAME
+chmod +x $NAME
+
+# Create README.md with one-line installer
+echo "# $NAME
+
+$DESCRIPTION
+
+## Install
+
+(or **Update**)
+
+    sudo curl -o /usr/local/bin/$NAME \"https://raw.github.com/$GITHUB/$NAME/master/$NAME\" && sudo chmod +x /usr/local/bin/$NAME
+
+---
+
+(also works with \`wget\`)
+
+    sudo wget -O /usr/local/bin/$NAME \"https://raw.github.com/$GITHUB/$NAME/master/$NAME\" && sudo chmod +x /usr/local/bin/$NAME
+
+## Uninstall
+
+    sudo rm -rf /usr/local/bin/$NAME" >> README.md
